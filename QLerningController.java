@@ -24,7 +24,9 @@ public class QLearningController extends Controller {
 	RocketEngine middleEngine;
 	RocketEngine rightEngine;
 
-	final static int NUM_ACTIONS = 6; /* The takeAction function must be changed if this is modified */
+	int mode = 1;
+	
+	final static int NUM_ACTIONS = 7; /* The takeAction function must be changed if this is modified */
 	
 	/* Keep track of the previous state and action */
 	String previous_state = null;
@@ -56,6 +58,8 @@ public class QLearningController extends Controller {
 	public SpringObject object;
 	ComposedSpringObject cso;
 	long lastPressedExplore = 0;
+	long lastPressedOne = 0;
+	long lastPressedTwo = 0;
 
 	public void init() {
 		cso = (ComposedSpringObject) object;
@@ -118,12 +122,19 @@ public class QLearningController extends Controller {
 		middleEngine.setBursting(true);
 	}
 	
+	void burstTheSmallOnes() {
+		leftEngine.setBursting(true);
+		rightEngine.setBursting(true);
+		middleEngine.setBursting(false);	
+	}
+	
 	public static final int ACTION_NONE = 0;
 	public static final int ACTION_CENTER = 1;
 	public static final int ACTION_LEFT = 2;
 	public static final int ACTION_RIGHT = 3;
 	public static final int ACTION_CENTER_LEFT = 4;
 	public static final int ACTION_CENTER_RIGHT = 5;
+	public static final int ACTION_LEFT_RIGHT = 6;
 	
 	/* Performs the chosen action */
 	void performAction(int action) {
@@ -149,32 +160,45 @@ public class QLearningController extends Controller {
 		case ACTION_CENTER_RIGHT:
 			burstTheBigOneAndTurnRight();
 			break;
+		case ACTION_LEFT_RIGHT:
+			burstTheSmallOnes();
+			break;
 		default:
 			break;
 		}
 	
 	}
 
+	
+
+
 	/* Main decision loop. Called every iteration by the simulator */
 	public void tick(int currentTime) {
 		iteration++;
 		
 		if (!paused) {
-			String new_state = StateAndReward.getStateHover(angle.getValue(), vx.getValue(), vy.getValue());
-
+			
+			String new_state = "";
+			
+			if(mode == 1) {
+				new_state = StateAndReward.getStateHover(angle.getValue(), vx.getValue(), vy.getValue());
+			} else {
+				new_state = StateAndReward.getStateAngle(angle.getValue(), vx.getValue(), vy.getValue());
+			}
 			/* Repeat the chosen action for a while, hoping to reach a new state. This is a trick to speed up learning on this problem. */
 			action_counter++;
 			if (new_state.equals(previous_state) && action_counter < REPEAT_ACTION_MAX) {
 				return;
 			}
-			/*
-			if(action_counter == REPEAT_ACTION_MAX) {
-				System.out.println("=======================");
-				System.out.println("Action counter hit max!");
-				System.out.println("=======================");
+			
+			double previous_reward = 0;
+			
+			if(mode == 1) {
+				previous_reward = StateAndReward.getRewardHover(previous_angle, previous_vx, previous_vy);
+			} else {
+				previous_reward = StateAndReward.getRewardAngle(previous_angle, previous_vx, previous_vy);
 			}
-			*/
-			double previous_reward = StateAndReward.getRewardHover(previous_angle, previous_vx, previous_vy);
+			
 			action_counter = 0;
 
 			/* The agent is in a new state, do learning and action selection */
@@ -303,12 +327,50 @@ public class QLearningController extends Controller {
 
 	/* Keys 1 and 2 can be customized for whatever purpose if you want to */
 	public void toggleCustom1() {
-		System.out.println("Custom key 1 pressed!");
+		
+		if (System.currentTimeMillis() - lastPressedOne < 1000) {
+			return;
+		}
+		
+		mode = (mode + 1) % 2;
+		
+		if (mode == 1) {
+			System.out.println("Hover mode enabled");
+		} else {
+			System.out.println("Angle mode enabled");
+		}
+		
+		toggleCustom2();
+		
+		lastPressedOne = System.currentTimeMillis(); 
+		
 	}
 
 	/* Keys 1 and 2 can be customized for whatever purpose if you want to */
 	public void toggleCustom2() {
-		System.out.println("Custom key 2 pressed!");
+		
+		if (System.currentTimeMillis() - lastPressedTwo < 1000) {
+			return;
+		}
+		
+		System.out.println("Everything has been reset");
+		
+		/* Keep track of the previous state and action */
+		previous_state = null;
+		previous_vx = 0;
+		previous_vy = 0;
+		previous_angle = 0;
+		previous_action = 0; 
+		
+		/* The tables used by Q-learning */
+		Qtable = new Hashtable<String, Double>(); /* Contains the Q-values - the state-action utilities */
+		Ntable = new Hashtable<String, Integer>(); /* Keeps track of how many times each state-action combination has been used */
+		
+		iteration = 0; /* Keeps track of how many iterations the agent has run */
+		action_counter = 0; /* Keeps track of how many times we have repeated the current action */
+		print_counter = 0; /* Makes printouts less spammy */ 
+		
+		lastPressedTwo = System.currentTimeMillis(); 
 	}
 	
 	public void pause() {
