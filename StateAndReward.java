@@ -59,20 +59,19 @@ public class StateAndReward {
 		
 		return reward;
 	}
-	
-	public static final int ANGLE_RESOLUTION = 15;
-	public static final int VX_RESOLUTION = 7;
+	public static final int ANGLE_RESOLUTION = 7;
+	//public static final int VX_RESOLUTION = 7;
 	public static final int VY_RESOLUTION = 5;
 	
-	public static final int VELOCITY_BOUND = 4;
+	public static final int VELOCITY_BOUND = 1;
 	
 	
 	/*reward discretization function for the full hover controller */
 	public static String getStateHover(double angle, double vx, double vy) {
 
 		String state = "STATE-ANGLE-" +
-						discretize(angle,ANGLE_RESOLUTION,-1.5,1.5) +
-						"-VX-" + discretize(vx,VX_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) +
+						discretize(angle,ANGLE_RESOLUTION,-1,1) +
+						/*"-VX-" + discretize(vx,VX_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) +*/
 						"-VY-" + discretize(vy,VY_RESOLUTION,-VELOCITY_BOUND-3,VELOCITY_BOUND);
 		
 		return state;
@@ -83,15 +82,15 @@ public class StateAndReward {
 
 		double a_reward = (((ANGLE_RESOLUTION-1)/2) - Math.abs(discretize(angle,ANGLE_RESOLUTION,-3,3) - ((ANGLE_RESOLUTION-1)/2)));
 		
-		double x_reward = 2*(((VX_RESOLUTION-1)/2) - Math.abs(discretize(vx,VX_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) - ((VX_RESOLUTION-1)/2)));
+		//double x_reward = 2*(((VX_RESOLUTION-1)/2) - Math.abs(discretize(vx,VX_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) - ((VX_RESOLUTION-1)/2)));
 		
-		double y_reward = 2.5*(((VY_RESOLUTION-1)/2) - Math.abs(discretize(vy,VY_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) - ((VY_RESOLUTION-1)/2)));
+		double y_reward = 1.5*(((VY_RESOLUTION-1)/2) - Math.abs(discretize(vy,VY_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) - ((VY_RESOLUTION-1)/2)));
 		
-		System.out.println("x: "+x_reward);
+		//System.out.println("x: "+x_reward);
 		System.out.println("y: "+y_reward);
 		System.out.println("a: "+a_reward);
 		
-		return a_reward + x_reward + y_reward;
+		return a_reward + /*x_reward*/ + y_reward;
 	}
 
 	// ///////////////////////////////////////////////////////////
