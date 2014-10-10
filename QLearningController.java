@@ -26,7 +26,7 @@ public class QLearningController extends Controller {
 
 	int mode = 1;
 	
-	final static int NUM_ACTIONS = 7; /* The takeAction function must be changed if this is modified */
+	final static int NUM_ACTIONS = 4; /* The takeAction function must be changed if this is modified */
 	
 	/* Keep track of the previous state and action */
 	String previous_state = null;
@@ -132,9 +132,9 @@ public class QLearningController extends Controller {
 	public static final int ACTION_CENTER = 1;
 	public static final int ACTION_LEFT = 2;
 	public static final int ACTION_RIGHT = 3;
-	public static final int ACTION_CENTER_LEFT = 4;
-	public static final int ACTION_CENTER_RIGHT = 5;
-	public static final int ACTION_LEFT_RIGHT = 6;
+	//public static final int ACTION_CENTER_LEFT = 4;
+	//public static final int ACTION_CENTER_RIGHT = 5;
+	//public static final int ACTION_LEFT_RIGHT = 6;
 	
 	/* Performs the chosen action */
 	void performAction(int action) {
@@ -154,15 +154,15 @@ public class QLearningController extends Controller {
 		case ACTION_RIGHT:
 			rotateRight();
 			break;
-		case ACTION_CENTER_LEFT:
+		/*case ACTION_CENTER_LEFT:
 			burstTheBigOneAndTurnLeft();
-			break;
-		case ACTION_CENTER_RIGHT:
+			break;*/
+		/*case ACTION_CENTER_RIGHT:
 			burstTheBigOneAndTurnRight();
-			break;
-		case ACTION_LEFT_RIGHT:
+			break;*/
+		/*case ACTION_LEFT_RIGHT:
 			burstTheSmallOnes();
-			break;
+			break;*/
 		default:
 			break;
 		}
