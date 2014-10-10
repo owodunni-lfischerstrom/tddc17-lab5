@@ -59,9 +59,8 @@ public class StateAndReward {
 		
 		return reward;
 	}
-	public static final int ANGLE_RESOLUTION = 7;
-	//public static final int VX_RESOLUTION = 7;
-	public static final int VY_RESOLUTION = 5;
+	public static final int ANGLE_RESOLUTION = 11;
+	public static final int VY_RESOLUTION = 7;
 	
 	public static final int VELOCITY_BOUND = 1;
 	
@@ -70,8 +69,7 @@ public class StateAndReward {
 	public static String getStateHover(double angle, double vx, double vy) {
 
 		String state = "STATE-ANGLE-" +
-						discretize(angle,ANGLE_RESOLUTION,-1,1) +
-						/*"-VX-" + discretize(vx,VX_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) +*/
+						discretize(angle,ANGLE_RESOLUTION,-.8,.8) +
 						"-VY-" + discretize(vy,VY_RESOLUTION,-VELOCITY_BOUND-3,VELOCITY_BOUND);
 		
 		return state;
@@ -80,11 +78,27 @@ public class StateAndReward {
 	/* Reward function for the full hover controller */
 	public static double getRewardHover(double angle, double vx, double vy) {
 
-		double a_reward = (((ANGLE_RESOLUTION-1)/2) - Math.abs(discretize(angle,ANGLE_RESOLUTION,-3,3) - ((ANGLE_RESOLUTION-1)/2)));
+		double a_reward = 0;
+		double y_reward = 0;
 		
-		//double x_reward = 2*(((VX_RESOLUTION-1)/2) - Math.abs(discretize(vx,VX_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) - ((VX_RESOLUTION-1)/2)));
+		int a_state = discretize(angle,ANGLE_RESOLUTION,-3,3);
+		int y_state = discretize(vy,VY_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND);
 		
-		double y_reward = 1.5*(((VY_RESOLUTION-1)/2) - Math.abs(discretize(vy,VY_RESOLUTION,-VELOCITY_BOUND,VELOCITY_BOUND) - ((VY_RESOLUTION-1)/2)));
+		int a_optimum = (ANGLE_RESOLUTION-1)/2;
+		int y_optimum = (VY_RESOLUTION-1)/2;
+		
+		if(a_state == a_optimum){
+			a_reward = 4*a_optimum;
+		}else {
+			a_reward = (a_optimum - Math.abs(a_state - a_optimum));
+		}
+		
+		if(y_state == y_optimum){
+			y_reward = 5*y_optimum;
+		}else {
+			y_reward = (y_optimum - Math.abs(y_state - y_optimum));
+		}
+
 		
 		//System.out.println("x: "+x_reward);
 		System.out.println("y: "+y_reward);
